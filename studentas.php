@@ -27,6 +27,30 @@ $result=$pdo->prepare($pazymiai);
 $result->execute([$_GET['id']]);
 $pazymiai=$result->fetchAll(PDO::FETCH_ASSOC);  
 
+/* studentui priskirti kursa */
+
+if (isset($_POST['action']) && $_POST['action']=='insert'){   
+    $studentoID = $_GET['id'];
+    
+    $sql="INSERT INTO paskaitos_kursai (student_id, paskaitos_id) VALUES (?, ?)";
+    $stm=$pdo->prepare($sql);
+    $stm->execute([ $studentoID, $_POST['paskaitos_id']]);
+   
+    header("location:studentas.php?id=$studentoID");
+    die();
+    
+  }
+  if (isset($_GET['id'])){
+
+    $sql="SELECT * FROM paskaitos";
+    $stm=$pdo->prepare($sql);
+    $stm->execute([]);
+    $studentoKursai=$stm->fetchAll(PDO::FETCH_ASSOC);
+  }else{
+    header("location:studentas.php?id=$studentoID");
+    die();
+  }
+
 ?>
 
 
@@ -57,14 +81,25 @@ $pazymiai=$result->fetchAll(PDO::FETCH_ASSOC);
 				</div>
 				<div class="card-body">
 				<div class="col-md-6 d-flex flex-row">				
-			
+                <form action="" method="POST">
+                        <input type="hidden" name="action" value="insert"> 
+                           
+                            <div class="mb-3">
+                                <label for="" class="form-label">Pridėti studentui paskaitas:  <button class="btn btn-success">Pridėti</button></label>
+                                <select name="paskaitos_id" class="form-control mb-3">
+                                    <?php foreach($studentoKursai as $sk){ ?>
+                                        
+                                    <option value="<?=$sk['id']?>" ><?=$sk['title']?></option>
+                                    <?php } ?>  
+                                </select>                                                     
+                        </form>
 			</div> 
 				</div>
 			</div>
 		</div>
 			
 					<div class="row">
-			<div class="card mt-5 mb-5">
+			<div class="card mt-2 mb-2">
 			
 
 				<div class="card-body">
@@ -103,7 +138,7 @@ $pazymiai=$result->fetchAll(PDO::FETCH_ASSOC);
 
     <!-- studento pazymiai lankomumas -->
     <div class="row">
-			<div class="card mt-5 mb-5">
+			<div class="card mb-2">
 			
 
 				<div class="card-body">

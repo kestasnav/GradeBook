@@ -1,4 +1,5 @@
 <?php
+include("dblogin.php");
 
 $lectures="SELECT *, paskaitos.title as paskaitos FROM paskaitos";
 $result=$pdo->query($lectures);
