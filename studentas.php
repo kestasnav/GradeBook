@@ -29,7 +29,8 @@ $pazymiai=$result->fetchAll(PDO::FETCH_ASSOC);
 
 /* studentui priskirti kursa */
 
-if (isset($_POST['action']) && $_POST['action']=='insert'){   
+
+  if (isset($_GET['id'])){if (isset($_POST['action']) && $_POST['action']=='insert'){   
     $studentoID = $_GET['id'];
     
     $sql="INSERT INTO paskaitos_kursai (student_id, paskaitos_id) VALUES (?, ?)";
@@ -40,7 +41,6 @@ if (isset($_POST['action']) && $_POST['action']=='insert'){
     die();
     
   }
-  if (isset($_GET['id'])){
 
     $sql="SELECT * FROM paskaitos";
     $stm=$pdo->prepare($sql);

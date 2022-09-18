@@ -3,7 +3,7 @@
 include("dblogin.php");
 
 /* paskaitos */
-$kursas="SELECT p.title as paskaitos, s.name as name, s.surname as surname
+$kursas="SELECT p.title as paskaitos, s.name as name, s.surname as surname, s.id as SID
 FROM paskaitos_kursai ps  
 LEFT JOIN studentai s ON s.id=ps.student_id
 LEFT JOIN paskaitos p ON p.id=ps.paskaitos_id
@@ -12,7 +12,54 @@ WHERE ps.paskaitos_id=?";
 $result=$pdo->prepare($kursas);
 $result->execute([$_GET['id']]);
 $kursai=$result->fetchAll(PDO::FETCH_ASSOC);
- 
+
+/* prideti pazymi */
+
+ if (isset($_GET['id'])){if (isset($_POST['action']) && $_POST['action']=='insert'){   
+     $studentoID = $_POST['studentID'];
+    $paskaitosID = $_GET['id'];
+    $sql="INSERT INTO pazymiai (grade, student_id, paskaitos_id) VALUES (?, ?, ?)";
+    $stm=$pdo->prepare($sql);
+    $stm->execute([ $_POST['grade'], $studentoID, $paskaitosID]);
+   
+    header("location:paskaita.php?id=$paskaitosID");
+    die();
+    
+}
+
+  $sql="SELECT * FROM pazymiai";
+    $stm=$pdo->prepare($sql);
+    $stm->execute([]);
+    $studentoKursai=$stm->fetchAll(PDO::FETCH_ASSOC);
+  }else{
+    header("location:paskaita.php?id=$paskaitosID");
+    die();
+  } 
+
+  /* prideti lankomuma */
+
+  if (isset($_GET['id'])){if (isset($_POST['action']) && $_POST['action']=='insert'){   
+    $studentoID = $_POST['studentID'];
+   $paskaitosID = $_GET['id'];
+   $sql="INSERT INTO lankomumas (student_id, paskaitos_id, dalyvavimas) VALUES (?, ?, ?)";
+   $stm=$pdo->prepare($sql);
+   $stm->execute([ $studentoID, $paskaitosID, $_POST['lankomumas']]);
+  
+   header("location:paskaita.php?id=$paskaitosID");
+   die();
+   
+}
+
+ $sql="SELECT * FROM lankomumas";
+   $stm=$pdo->prepare($sql);
+   $stm->execute([]);
+   $studentoKursai=$stm->fetchAll(PDO::FETCH_ASSOC);
+ }else{
+   header("location:paskaita.php?id=$paskaitosID");
+   die();
+ }
+
+
 ?>
 
 
@@ -62,17 +109,20 @@ $kursai=$result->fetchAll(PDO::FETCH_ASSOC);
                             </thead>
                             <tbody>  
                                 <form action="" method="POST">
+                                <input type="hidden" name="action" value="insert"> 
                                 <?php foreach($kursai as $paskaita){ ?>
                                     <tr class="text-center">
-                                       <td><?=$paskaita['name'] ?> <?=$paskaita['surname'] ?></td>                             
+                                       <td><input type="hidden" name="studentID" value="<?=$paskaita['SID']?>"> <?=$paskaita['name'] ?> <?=$paskaita['surname'] ?></td>                             
                                         <td><input type="number" name="grade" class="form-control text-center"></td>
-                                        <td>                              
-                                <select name="paskaitos_id" class="form-control mb-3">
+                                      <td>     
+                                                                 
+                                <select name="lankomumas" class="form-control mb-3">
                                     <option value="Taip">Taip</option>
                                     <option value="Ne">Ne</option>
                                      </select>       
                                      </td>
                                 </tr>
+                                
                                  <?php } ?>
                                 
                            </tbody>
