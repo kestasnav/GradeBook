@@ -6,26 +6,33 @@ include("dblogin.php");
 $kursas="SELECT p.title as paskaitos, s.name as name, s.surname as surname, s.id as SID
 FROM paskaitos_kursai ps  
 LEFT JOIN studentai s ON s.id=ps.student_id
-LEFT JOIN paskaitos p ON p.id=ps.paskaitos_id
+LEFT JOIN kursai k ON k.id=ps.kursu_id
+LEFT JOIN paskaitos p ON k.id=p.kursu_id
 
-WHERE ps.paskaitos_id=?";
+WHERE p.id=?";
 $result=$pdo->prepare($kursas);
 $result->execute([$_GET['id']]);
 $kursai=$result->fetchAll(PDO::FETCH_ASSOC);
 
 /* prideti pazymi */
 
- if (isset($_GET['id'])){if (isset($_POST['action']) && $_POST['action']=='insert'){   
-     $studentoID = $_POST['studentID'];
-    $paskaitosID = $_GET['id'];
-    $sql="INSERT INTO pazymiai (grade, student_id, paskaitos_id) VALUES (?, ?, ?)";
-    $stm=$pdo->prepare($sql);
-    $stm->execute([ $_POST['grade'], $studentoID, $paskaitosID]);
-   
-    header("location:paskaita.php?id=$paskaitosID");
-    die();
+ if (isset($_GET['id'])){if (isset($_POST['action']) && $_POST['action']=='insert'){ 
     
-}
+      $studentoID = $_POST['studentID'];  
+      $grade = $_POST['grade'];
+      $paskaitosID = $_GET['id'];
+      $lankomumas = $_POST['lankomumas'];
+
+    for($i=0; $i<sizeof($studentoID); $i++) {
+     
+      $sql="INSERT INTO pazymiai (grade, student_id, paskaitos_id, lankomumas) VALUES (?, ?, ?, ?)";
+  
+    $stm=$pdo->prepare($sql);
+    $stm->execute([ $grade[$i], $studentoID[$i], $paskaitosID, $lankomumas[$i]]);
+   
+    }
+  }
+
 
   $sql="SELECT * FROM pazymiai";
     $stm=$pdo->prepare($sql);
@@ -38,16 +45,18 @@ $kursai=$result->fetchAll(PDO::FETCH_ASSOC);
 
   /* prideti lankomuma */
 
-  if (isset($_GET['id'])){if (isset($_POST['action']) && $_POST['action']=='insert'){   
+/*   if (isset($_GET['id'])){if (isset($_POST['action']) && $_POST['action']=='insert'){   
     $studentoID = $_POST['studentID'];
    $paskaitosID = $_GET['id'];
+   $lankomumas = $_POST['lankomumas'];
+   for($i=0; $i<sizeof($studentoID); $i++) {
    $sql="INSERT INTO lankomumas (student_id, paskaitos_id, dalyvavimas) VALUES (?, ?, ?)";
    $stm=$pdo->prepare($sql);
-   $stm->execute([ $studentoID, $paskaitosID, $_POST['lankomumas']]);
+   $stm->execute([ $studentoID[$i], $paskaitosID, $lankomumas[$i]]);
   
    header("location:paskaita.php?id=$paskaitosID");
    die();
-   
+   }
 }
 
  $sql="SELECT * FROM lankomumas";
@@ -57,7 +66,7 @@ $kursai=$result->fetchAll(PDO::FETCH_ASSOC);
  }else{
    header("location:paskaita.php?id=$paskaitosID");
    die();
- }
+ } */
 
 
 ?>
@@ -110,13 +119,16 @@ $kursai=$result->fetchAll(PDO::FETCH_ASSOC);
                             <tbody>  
                                 <form action="" method="POST">
                                 <input type="hidden" name="action" value="insert"> 
-                                <?php foreach($kursai as $paskaita){ ?>
+                             
+                                <?php foreach($kursai as $paskaita){
+                                 
+                                  ?>
                                     <tr class="text-center">
-                                       <td><input type="hidden" name="studentID" value="<?=$paskaita['SID']?>"> <?=$paskaita['name'] ?> <?=$paskaita['surname'] ?></td>                             
-                                        <td><input type="number" name="grade" class="form-control text-center"></td>
+                                       <td><input type="hidden" name="studentID[]" value="<?=$paskaita['SID']?>"> <?=$paskaita['name'] ?> <?=$paskaita['surname'] ?></td>                             
+                                        <td><input type="number" name="grade[]" class="form-control text-center"></td>
                                       <td>     
                                                                  
-                                <select name="lankomumas" class="form-control mb-3">
+                                <select name="lankomumas[]" class="form-control mb-3">
                                     <option value="Taip">Taip</option>
                                     <option value="Ne">Ne</option>
                                      </select>       
